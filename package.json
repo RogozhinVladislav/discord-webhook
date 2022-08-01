@@ -1,0 +1,19 @@
+{
+  "name": "daily-discord-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": ""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^14.1.2",
+    "dotenv": "^16.0.1",
+    "isdayoff": "^1.0.1",
+    "node-cron": "^3.0.1",
+    "uuid": "^8.3.2"
+  }
+}
