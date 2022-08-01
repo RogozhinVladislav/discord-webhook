@@ -16,10 +16,10 @@ function send() {
     webhookClient.send({
         content:
             `
-@here ${bold('Приглашаю всех на Дейли')} в ${channel}
+@here ${bold('Приглашаю всех на Дейли в')} ${channel}
 Полезные ссылки:
 ${hyperlink('Доска в Jira', JIRA_URL)}
-${hyperlink('Запланированные задачи в Google Таблице', EXCEL_URL)}
+${hyperlink('Запланированные задачи в Google Таблице', `<${EXCEL_URL}>`)}
 `,
     });
 }
