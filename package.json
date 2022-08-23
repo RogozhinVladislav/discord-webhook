@@ -10,10 +10,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "date-fns": "^2.29.2",
     "discord.js": "^14.1.2",
     "dotenv": "^16.0.1",
     "isdayoff": "^1.0.1",
     "node-cron": "^3.0.1",
     "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^18.7.1"
   }
 }
