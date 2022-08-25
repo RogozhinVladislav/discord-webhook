@@ -2,8 +2,10 @@ require('dotenv').config()
 const cron = require('node-cron');
 const { differenceInDays, startOfDay } = require('date-fns');
 const isDayOffApi = require('isdayoff')();
+const googleSheet = require('./google-sheet');
+const quotes = require('./quotes');
 
-const { WebhookClient, bold, hyperlink, channelMention } = require('discord.js');
+const { WebhookClient, bold, spoiler, quote, blockQuote, hyperlink, channelMention } = require('discord.js');
 
 const { WEBHOOK_URL, EXCEL_URL, JIRA_URL, VOICE_CHAT_ID } = process.env
 
@@ -20,19 +22,49 @@ const cronOptions = {
 
 const channel = channelMention(VOICE_CHAT_ID)
 
-function sendDailyMessage() {
-    webhookClient.send({
-        content:
-            `
-@here ${bold('Приглашаю всех на Дейли в')} ${channel}
-Просьба:
-${hyperlink('Актуализировать задачки в Доске', JIRA_URL)}
-${hyperlink('План по задачам спринта в Google Таблице', `<${EXCEL_URL}>`)}
-`,
-    });
+async function sendDailyMessage() {
+
+    const dailyLead = await googleSheet.getDailyLead();
+
+    const quote = quotes[Math.floor(Math.random() * quotes.length)];
+
+    const exampleEmbed = {
+        "color": 0x0099ff,
+        "type": "rich",
+        "title": `Скоро Daily :clock11:`,
+        "description": `
+Через 5 минут начнётся дейлик, где можно поделиться с командой чем-то важным (или не очень важным)
+Сегодня его проводит ${bold(dailyLead)}
+Буду ждать всеx в ${channel}
+
+Цитата дня:
+${spoiler(`${blockQuote(quote)} :hamster: `)}`,
+        "fields": [
+            {
+                "name": "\u200B",
+                "value": ':chart_with_upwards_trend: ' + hyperlink('Задачки в Jira', JIRA_URL),
+                "inline": true
+            },
+            {
+                "name": "\u200B",
+                "value": ':calendar_spiral: ' + hyperlink('План спринта в Google Таблице', `<${EXCEL_URL}>`),
+                "inline": true
+            }
+        ],
+        "thumbnail": {
+            "url": `https://miro.medium.com/max/300/0*Xx5K0P5rW201QYpr.png`,
+            "height": 0,
+            "width": 0
+        },
+        "footer": {
+            "text": `можете пока актулизировать статусы в Jira ;)`
+        }
+    };
+
+    webhookClient.send({ content: `@here`, embeds: [exampleEmbed] })
 }
 
-cron.schedule('0 11 * * *', function () {
+cron.schedule('55 10 * * *', function () {
     isDayOffApi.today()
         .then((isDayOff) => {
             if (!isDayOff) {
