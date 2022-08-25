@@ -25,9 +25,9 @@ function sendDailyMessage() {
         content:
             `
 @here ${bold('Приглашаю всех на Дейли в')} ${channel}
-Полезные ссылки:
-${hyperlink('Доска в Jira', JIRA_URL)}
-${hyperlink('Запланированные задачи в Google Таблице', `<${EXCEL_URL}>`)}
+Просьба:
+${hyperlink('Актуализировать задачки в Доске', JIRA_URL)}
+${hyperlink('План по задачам спринта в Google Таблице', `<${EXCEL_URL}>`)}
 `,
     });
 }
