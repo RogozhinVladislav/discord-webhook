@@ -33,7 +33,7 @@ async function sendDailyMessage() {
         "type": "rich",
         "title": `Скоро Daily :clock11:`,
         "description": `
-Через 5 минут начнётся дейлик, где можно поделиться с командой чем-то важным (или не очень важным)
+Через минуту начнётся дейлик, где можно поделиться с командой чем-то важным (или не очень важным)
 Сегодня его проводит ${bold(dailyLead)}
 Буду ждать всеx в ${channel}
 
@@ -64,10 +64,10 @@ ${spoiler(`${blockQuote(quote)} :hamster: `)}`,
     webhookClient.send({ content: `@here`, embeds: [exampleEmbed] })
 }
 
-cron.schedule('55 10 * * *', function () {
+cron.schedule('59 10 * * *', function () {
     isDayOffApi.today()
         .then((isDayOff) => {
-            if (!isDayOff) {
+            if (!isDayOff && !isDaySprintClosing()) {
                 sendDailyMessage();
             }
         })
