@@ -30,6 +30,15 @@ module.exports.getDailyLead = async function getDaylyLead() {
         dailyLeads[date] = name
     }
 
+    const dailyLeadsIds = {
+        'Женя': '996675915604045915',
+        'Влад Ф': '701783368819540082',
+        'Влад Р': '555349812774567958',
+        'Настя': '969149875751116800',
+        'Руслан': '1008650409340063866',
+        'Маша': '969494810983534682',
+    }
+
     function numberToDate(number) {
         if (!number) return ''
         var date = new Date(number * 24 * 60 * 60 * 1000);
@@ -40,5 +49,9 @@ module.exports.getDailyLead = async function getDaylyLead() {
 
     const today = new Date().toLocaleDateString("en-US");
 
-    return dailyLeads[today]
+    const dailyLeadName = dailyLeads[today];
+
+    const dailyLeadId = dailyLeadsIds[dailyLeadName]
+
+    return { dailyLeadName, dailyLeadId }
 }

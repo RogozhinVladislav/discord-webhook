@@ -5,9 +5,9 @@ const isDayOffApi = require('isdayoff')();
 const googleSheet = require('./google-sheet');
 const quotes = require('./quotes');
 
-const { WebhookClient, bold, spoiler, quote, blockQuote, hyperlink, channelMention } = require('discord.js');
+const { WebhookClient, bold, spoiler, blockQuote, hyperlink, channelMention, userMention } = require('discord.js');
 
-const { WEBHOOK_URL, EXCEL_URL, JIRA_URL, VOICE_CHAT_ID } = process.env
+const { WEBHOOK_URL, EXCEL_URL, JIRA_URL, SPRINT_REVIEW_ZOOM_URL, VOICE_CHAT_ID } = process.env
 
 const webhookClient = new WebhookClient({
     url: WEBHOOK_URL
@@ -22,10 +22,16 @@ const cronOptions = {
 
 const channel = channelMention(VOICE_CHAT_ID)
 
+async function sendDailyLeader() {
+
+    const { dailyLeadId } = await googleSheet.getDailyLead();
+
+    const dailyLeadUser = userMention(dailyLeadId);
+
+    webhookClient.send({ content: `Сегодня дейли проводит ${dailyLeadUser} :clap:` })
+}
+
 async function sendDailyMessage() {
-
-    const dailyLead = await googleSheet.getDailyLead();
-
     const quote = quotes[Math.floor(Math.random() * quotes.length)];
 
     const exampleEmbed = {
@@ -34,7 +40,6 @@ async function sendDailyMessage() {
         "title": `Скоро Daily :clock11:`,
         "description": `
 Через минуту начнётся дейлик, где можно поделиться с командой чем-то важным (или не очень важным)
-Сегодня его проводит ${bold(dailyLead)}
 Буду ждать всеx в ${channel}
 
 Цитата дня:
@@ -57,12 +62,21 @@ ${spoiler(`${blockQuote(quote)} :hamster: `)}`,
             "width": 0
         },
         "footer": {
-            "text": `можете пока актулизировать статусы в Jira ;)`
+            "text": `не забудьте актуализировать статусы задач в Jira ;)`
         }
     };
 
     webhookClient.send({ content: `@here`, embeds: [exampleEmbed] })
 }
+
+cron.schedule('55 10 * * *', function () {
+    isDayOffApi.today()
+        .then((isDayOff) => {
+            if (!isDayOff && !isDaySprintClosing()) {
+                sendDailyLeader();
+            }
+        })
+}, cronOptions);
 
 cron.schedule('59 10 * * *', function () {
     isDayOffApi.today()
@@ -103,6 +117,42 @@ cron.schedule('30 9 * * wed', function () {
             .then((isDayOff) => {
                 if (!isDayOff) {
                     sendSprintIsClosingMessage()
+                }
+            })
+    }
+}, cronOptions);
+
+///// Обзор спринта ======================
+
+function sendSprintReviewMessage() {
+    webhookClient.send({
+        avatarURL: 'https://cdn.discordapp.com/attachments/1003198982337605645/1048165112931958804/unknown.png',
+        content:
+            `
+@here ${bold('Начинается обзор спринта')}
+${hyperlink('Ссылка на ZOOM', SPRINT_REVIEW_ZOOM_URL)}
+`,
+    });
+}
+
+function isDaySprintReview() {
+    // 26 July 2022 г., 0:00:00 (была вторник, день обзора спринта)
+    const start = new Date(1658793600000);
+    const today = startOfDay(new Date());
+
+    const diffDays = differenceInDays(today, start) + 1
+
+    if (diffDays % 14 === 0) return true;
+
+    return false;
+}
+
+cron.schedule('59 12 * * tues', function () {
+    if (isDaySprintReview()) {
+        isDayOffApi.today()
+            .then((isDayOff) => {
+                if (!isDayOff) {
+                    sendSprintReviewMessage()
                 }
             })
     }
