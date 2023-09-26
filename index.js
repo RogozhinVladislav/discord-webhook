@@ -2,12 +2,18 @@ require('dotenv').config()
 const Cron = require("croner");
 const { differenceInDays, startOfDay } = require('date-fns');
 const isDayOffApi = require('isdayoff')();
+const OpenAI = require('openai');
 const googleSheet = require('./google-sheet');
 const quotes = require('./quotes');
+const { getDailyLeadPromt } = require('./promts');
 
 const { WebhookClient, bold, italic, spoiler, blockQuote, hyperlink, channelMention, userMention } = require('discord.js');
 
-const { WEBHOOK_URL, EXCEL_URL, JIRA_URL, SPRINT_REVIEW_URL, VOICE_CHAT_ID } = process.env
+const { WEBHOOK_URL, EXCEL_URL, JIRA_URL, SPRINT_REVIEW_URL, VOICE_CHAT_ID, OPENAI_API_KEY } = process.env
+
+const openai = new OpenAI({
+    apiKey: OPENAI_API_KEY,
+});
 
 const webhookClient = new WebhookClient({
     url: WEBHOOK_URL
@@ -23,11 +29,30 @@ const channel = channelMention(VOICE_CHAT_ID)
 
 async function sendDailyLeader() {
 
-    const { dailyLeadId } = await googleSheet.getDailyLead();
+    const { dailyLeadId, dailyLeadName } = await googleSheet.getDailyLead();
 
-    const dailyLeadUser = userMention(dailyLeadId);
+    try {
+        const promt = getDailyLeadPromt(dailyLeadName)
 
-    webhookClient.send({ content: `Сегодня дейли проводит ${dailyLeadUser} :clap:` })
+        const chatCompletion = await openai.chat.completions.create({
+            messages: [{ role: 'user', content: promt }],
+            model: 'gpt-4',
+            temperature: 0.7,
+        });
+
+        const regex = /<([^<>]+)>/g;
+        const content = chatCompletion.choices[0].message.content
+        const dailyLeadUser = userMention(dailyLeadId);
+
+        const modifiedMessage = content.replace(regex, dailyLeadUser);
+
+        webhookClient.send({ content: modifiedMessage })
+    } catch (error) {
+        console.error("Error with OpenAI request:", error);
+        
+        const dailyLeadUser = userMention(dailyLeadId);
+        webhookClient.send({ content: `Сегодня дейли проводит ${dailyLeadUser} :clap:` });
+    }
 }
 
 async function sendDailyMessage() {
