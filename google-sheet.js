@@ -23,11 +23,13 @@ module.exports.getDailyLead = async function getDaylyLead() {
 
     const sheet = doc.sheetsByIndex[index];
 
-    await sheet.loadCells('A1:k2');
+    await sheet.loadCells('A1:L2');
 
     const dailyLeads = {}
 
-    for (let i = 1; i <= 10; i++) {
+    const start = 2;
+
+    for (let i = start; i <= 10; i++) {
         const numberDate = sheet.getCell(0, i).value
         if (numberDate) {
             const date = numberToDate(numberDate).toLocaleDateString("en-US");
