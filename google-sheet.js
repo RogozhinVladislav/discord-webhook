@@ -5,8 +5,7 @@ const dailyLeadsIds = require('./team-members');
 // }
 
 module.exports.getDailyLead = async function getDaylyLead() {
-    const doc = new GoogleSpreadsheet(process.env.DOC_ID);
-    doc.useApiKey(process.env.GOOGLE_API_KEY);
+    const doc = new GoogleSpreadsheet(process.env.DOC_ID, { apiKey: process.env.GOOGLE_API_KEY });
 
     await doc.loadInfo();
 
