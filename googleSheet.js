@@ -1,5 +1,5 @@
 const { GoogleSpreadsheet } = require('google-spreadsheet');
-const dailyLeadsIds = require('./team-members');
+const dailyLeadsIds = require('./teamMembers');
 // {
 //     'Имя': 'Discord ID',
 // }

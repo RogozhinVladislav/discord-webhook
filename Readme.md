@@ -8,7 +8,7 @@ VOICE_CHAT_ID
 GOOGLE_API_KEY  
 DOC_ID  
 
-#### team-members.js
+#### teamMembers.js
 Пример
 ```
 module.exports = {
