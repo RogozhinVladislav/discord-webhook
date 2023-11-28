@@ -27,8 +27,9 @@ module.exports.getDailyLead = async function getDaylyLead() {
     const dailyLeads = {}
 
     const start = 2;
+    const end = 11;
 
-    for (let i = start; i <= 10; i++) {
+    for (let i = start; i <= end; i++) {
         const numberDate = sheet.getCell(0, i).value
         if (numberDate) {
             const date = numberToDate(numberDate).toLocaleDateString("en-US");
