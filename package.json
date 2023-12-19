@@ -16,6 +16,7 @@
     "discord.js": "^14.1.2",
     "dotenv": "^16.0.1",
     "google-spreadsheet": "^4.1.0",
+    "https-proxy-agent": "^7.0.2",
     "isdayoff": "^1.0.1",
     "openai": "^4.10.0",
     "uuid": "^8.3.2"

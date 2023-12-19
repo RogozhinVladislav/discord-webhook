@@ -1,9 +1,11 @@
 const OpenAI = require('openai');
 const { spoiler, blockQuote, hyperlink, channelMention, userMention } = require('discord.js');
+const axios = require("axios");
+const { HttpsProxyAgent } = require('https-proxy-agent');
 const { getDailyLeadPromt } = require('./promts');
 const googleSheet = require('./googleSheet');
 const quotes = require('./quotes');
-const { OPENAI_API_KEY, VOICE_CHAT_ID, JIRA_URL, EXCEL_URL } = require('./configurations');
+const { OPENAI_API_KEY, VOICE_CHAT_ID, JIRA_URL, EXCEL_URL, PROXY_STRING } = require('./configurations');
 const webhookClient = require('./webhookClient');
 
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
@@ -17,14 +19,30 @@ async function sendDailyLeader() {
     try {
         const promt = getDailyLeadPromt(dailyLeadName)
 
-        const chatCompletion = await openai.chat.completions.create({
-            messages: [{ role: 'user', content: promt }],
-            model: 'gpt-4',
-            temperature: 0.7,
-        });
+        const request = {
+            method: 'post',
+            url: 'https://api.openai.com/v1/chat/completions',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${OPENAI_API_KEY}`
+            },
+            data: {
+                model: 'gpt-4',
+                messages: [
+                    {
+                        role: 'user',
+                        content: promt
+                    }
+                ],
+                temperature: 0.7
+            },
+            httpsAgent: new HttpsProxyAgent(PROXY_STRING)
+        };
+
+        const response = await axios(request);
+        const content = response.data.choices[0].message.content
 
         const regex = /<([^<>]+)>/g;
-        const content = chatCompletion.choices[0].message.content
         const dailyLeadUser = userMention(dailyLeadId);
 
         const modifiedMessage = content.replace(regex, dailyLeadUser);
