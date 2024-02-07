@@ -1,55 +1,24 @@
-const OpenAI = require('openai');
 const { spoiler, blockQuote, hyperlink, channelMention, userMention } = require('discord.js');
-const axios = require("axios");
-const { HttpsProxyAgent } = require('https-proxy-agent');
-const { getDailyLeadPromt } = require('./promts');
 const googleSheet = require('./googleSheet');
 const quotes = require('./quotes');
-const { OPENAI_API_KEY, VOICE_CHAT_ID, JIRA_URL, EXCEL_URL, PROXY_STRING } = require('./configurations');
+const { VOICE_CHAT_ID, JIRA_URL, EXCEL_URL } = require('./configurations');
 const webhookClient = require('./webhookClient');
-
-const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
+const GPT = require('./gpt');
 
 const channel = channelMention(VOICE_CHAT_ID)
 
 async function sendDailyLeader() {
-
     const { dailyLeadId, dailyLeadName } = await googleSheet.getDailyLead();
 
     try {
-        const promt = getDailyLeadPromt(dailyLeadName)
+        const message = await GPT(dailyLeadId, dailyLeadName)
+        console.log("🚀 ~ message:", message)
 
-        const request = {
-            method: 'post',
-            url: 'https://api.openai.com/v1/chat/completions',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${OPENAI_API_KEY}`
-            },
-            data: {
-                model: 'gpt-4',
-                messages: [
-                    {
-                        role: 'user',
-                        content: promt
-                    }
-                ],
-                temperature: 0.7
-            },
-            httpsAgent: new HttpsProxyAgent(PROXY_STRING)
-        };
-
-        const response = await axios(request);
-        const content = response.data.choices[0].message.content
-
-        const regex = /<([^<>]+)>/g;
-        const dailyLeadUser = userMention(dailyLeadId);
-
-        const modifiedMessage = content.replace(regex, dailyLeadUser);
-
-        webhookClient.send({ content: modifiedMessage })
+        webhookClient.send({ content: message })
     } catch (error) {
-        console.error("Error with OpenAI request:", error);
+        console.error("Error with OpenAI request (full):", error);
+        console.error("=========================");
+        console.error("Error with OpenAI request:", JSON.stringify(error.response.data.error, null, 2));
 
         const dailyLeadUser = userMention(dailyLeadId);
         webhookClient.send({ content: `Сегодня дейли проводит ${dailyLeadUser} :clap:` });
