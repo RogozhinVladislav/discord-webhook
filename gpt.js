@@ -1,11 +1,18 @@
 const { userMention } = require('discord.js');
 const axios = require("axios");
 const { HttpsProxyAgent } = require('https-proxy-agent');
-const { getDailyLeadPromt } = require('./promts');
+const { getDailyLeadPromt, getChallengePromt } = require('./promts');
 const { OPENAI_API_KEY, PROXY_STRING } = require('./configurations');
 
-module.exports = async function (dailyLeadId, dailyLeadName) {
-    const promt = getDailyLeadPromt(dailyLeadName)
+module.exports = async function (dailyLeadId, dailyLeadName, promtName) {
+    let promt = '';
+
+    if (promtName === 'joke') {
+        promt = getDailyLeadPromt(dailyLeadName)
+    } else {
+        promt = getChallengePromt()
+    }
+
 
     const request = {
         method: 'post',
