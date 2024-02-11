@@ -3,3 +3,5 @@ node_modules
 teamMembers.js
 promts.js
 .acquiring
+combined.json
+error.json
