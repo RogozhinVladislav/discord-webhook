@@ -29,11 +29,11 @@ module.exports.getDailyLead = async function getDaylyLead() {
     const start = 2;
     const end = 11;
 
-    for (let i = start; i <= end; i++) {
+    for (let i = start; i < end; i++) {
         const numberDate = sheet.getCell(0, i).value
         if (numberDate) {
             const date = numberToDate(numberDate).toLocaleDateString("en-US");
-            const name = sheet.getCell(1, i).formattedValue;
+            const name = sheet.getCell(1, i + 1).formattedValue;
             dailyLeads[date] = name
         }
     }

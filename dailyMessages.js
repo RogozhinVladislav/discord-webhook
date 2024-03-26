@@ -3,27 +3,29 @@ const googleSheet = require('./googleSheet');
 const quotes = require('./quotes');
 const { VOICE_CHAT_ID, JIRA_URL, EXCEL_URL } = require('./configurations');
 const webhookClient = require('./webhookClient');
-// const GPT = require('./gpt');
+const GPT = require('./gpt');
 const getWeatherEmbed = require('./weather');
 
-const channel = channelMention(VOICE_CHAT_ID)
+const channel = channelMention(VOICE_CHAT_ID);
+
+const showWeather = false;
 
 async function sendDailyLeader() {
     const { dailyLeadId, dailyLeadName } = await googleSheet.getDailyLead();
 
     try {
-        // const message = await GPT(dailyLeadId, dailyLeadName, 'challenge')
-
-        // webhookClient.send({ content: message })
-
-        const dailyLeadUser = userMention(dailyLeadId);
-        const embed = await getWeatherEmbed()
-
-        webhookClient.send({ content: `Сегодня дейли проводит ${dailyLeadUser} :clap:`, embeds: [embed] })
+        if (showWeather) {
+            const dailyLeadUser = userMention(dailyLeadId);
+            const embed = await getWeatherEmbed();
+            webhookClient.send({ content: `Сегодня дейли проводит ${dailyLeadUser} :clap:`, embeds: [embed] });
+        } else {
+            const message = await GPT(dailyLeadId, dailyLeadName, 'joke');
+            webhookClient.send({ content: message });
+        }
     } catch (error) {
-        console.error("Error with OpenAI request (full):", error);
+        console.error("Error with request (full):", error);
         console.error("=========================");
-        console.error("Error with OpenAI request:", JSON.stringify(error.response?.data?.error, null, 2));
+        console.error("Error with request:", JSON.stringify(error.response?.data?.error, null, 2));
 
         const dailyLeadUser = userMention(dailyLeadId);
         webhookClient.send({ content: `Сегодня дейли проводит ${dailyLeadUser} :clap:` });
