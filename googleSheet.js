@@ -29,20 +29,25 @@ module.exports.getDailyLead = async function getDaylyLead() {
     const start = 2;
     const end = 11;
 
-    for (let i = start; i < end; i++) {
-        const numberDate = sheet.getCell(0, i).value
-        if (numberDate) {
-            const date = numberToDate(numberDate).toLocaleDateString("en-US");
-            const name = sheet.getCell(1, i + 1).formattedValue;
-            dailyLeads[date] = name
+    for (let i = start; i <= end; i++) {
+        const excelDate = sheet.getCell(0, i).value;
+        if (excelDate) {
+            const date = numberToDate(excelDate);
+            const dayOfWeek = date.getDay();
+            // Skip weekends
+          if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+              const dateString = date.toLocaleDateString("en-US");
+              const name = sheet.getCell(1, i).formattedValue;
+              dailyLeads[dateString] = name;
+          }
         }
     }
-
-    function numberToDate(number) {
-        var date = new Date(number * 24 * 60 * 60 * 1000);
-        date.setFullYear(date.getFullYear() - 70);
-        date.setDate(date.getDate() - 1);
-        return (date);
+    
+    function numberToDate(excelDateNumber) {
+        const excelEpoch = new Date(1899, 11, 30); // December 30, 1899
+        const excelEpochAsUnixTimestamp = excelEpoch.getTime();
+        const excelDateAsUnixTimestamp = excelEpochAsUnixTimestamp + excelDateNumber * 24 * 60 * 60 * 1000;
+        return new Date(excelDateAsUnixTimestamp);
     }
 
     const today = new Date().toLocaleDateString("en-US");
