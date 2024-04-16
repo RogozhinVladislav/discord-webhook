@@ -42,7 +42,7 @@ getDailyLead - загружает гугл док, который имеет 2 �
 
 ### pm2
 ```
-pm2 start index.js --name acqhamster
+pm2 start main.js --name acqhamster
 pm2 restart acqhamster
 pm2 stop acqhamster
 ```
