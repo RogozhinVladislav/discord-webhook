@@ -3,7 +3,7 @@ const isDayOffApi = require('isdayoff')();
 const { sendDailyLeader, sendDailyMessage } = require('./dailyMessages');
 const { sendSprintIsClosingMessage } = require('./sprintClosing');
 const { sendSprintReviewMessage, sendSprintFeedbackMessage } = require('./sprintReview');
-const { isDaySprintClosing, isLastDayOfSprint } = require('./utilities');
+const { isDaySprintClosing, isLastDayOfSprint, isSprintReviewTime } = require('./utilities');
 
 const cronOptions = {
     timezone: "Europe/Moscow"
@@ -43,7 +43,7 @@ Cron('30 9 * * WED', function () {
 
 // Уведомление об обзоре спринта за 1 минуту до начала
 Cron('59 12 * * TUE', function () {
-    if (isLastDayOfSprint()) {
+    if (isSprintReviewTime()) {
         isDayOffApi.today()
             .then((isDayOff) => {
                 if (!isDayOff) {
