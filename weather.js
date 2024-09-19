@@ -22,6 +22,14 @@ const cities = [
         "name": "Izhevsk",
         "emoji": "🏞"
     },
+    {
+        "name": "Tbilisi",
+        "emoji": "🍷"
+    },
+    {
+        "name": "Orenburg",
+        "emoji": "🐪"
+    }
 ]
 
 const baseUrl = 'http://api.openweathermap.org/data/2.5/weather';
